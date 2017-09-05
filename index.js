@@ -67,8 +67,6 @@ module.exports = function (view, options, partials) {
             var full = process.cwd() + "/" + file.path;
             var part = full.substr(full.lastIndexOf("/html/") + 6);
 
-            console.log("part >>> " + part);
-
             var webRoot = "";
 
             if ( part.substr(0, 8) !== "partials" ) {
