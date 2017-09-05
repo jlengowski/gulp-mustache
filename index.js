@@ -27,6 +27,7 @@ module.exports = function (view, options, partials) {
     }
 
     return through.obj(function (file, enc, cb) {
+
         if (file.isNull()) {
             this.push(file);
             return cb();
@@ -57,9 +58,34 @@ module.exports = function (view, options, partials) {
         }
 
         try {
+            
+            var data = file.path.substr(file.path.lastIndexOf("/") + 1).replace("html", "json");
+
+            data = process.cwd() + "/src/json/" + data;
+            data = fs.existsSync(data) ? JSON.parse(fs.readFileSync(data, "utf8")) : {};
+
+            var full = process.cwd() + "/" + file.path;
+            var part = full.substr(full.lastIndexOf("/html/") + 6);
+
+            console.log("part >>> " + part);
+
+            var webRoot = "";
+
+            if ( part.substr(0, 8) !== "partials" ) {
+                var parts = part.split("/");
+                if (parts && parts.length && parts.length >= 2) {
+                    for (var i = 1; i < parts.length; i ++) {
+                        webRoot = webRoot + "../";
+                    }
+                }
+            }
+
+            Object.assign(data, { webRoot: webRoot });
+
             file.contents = new Buffer(
-                mustache.render(template, file.data || view, partials)
+                mustache.render(template, data || file.data || view, partials)
             );
+
         } catch (e) {
             this.emit(
                 'error',
